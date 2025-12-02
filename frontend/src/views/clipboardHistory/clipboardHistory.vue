@@ -281,7 +281,7 @@ import ClipboardImageView from "./components/clipboardImageView.vue";
 import ClipboardJsonView from "./components/clipboardJsonView.vue";
 import ClipboardTitleView from "./components/clipboardTitleView.vue";
 import SettingView from "../setting/setting.vue";
-import { ElMessageBox, ElMessage } from "element-plus";
+import { ElMessage } from "element-plus";
 
 interface ClipboardItem {
   ID: string;
@@ -470,26 +470,16 @@ async function copyItem(id: string) {
 
 // 删除项目
 async function deleteItem(id: string) {
-  ElMessageBox.confirm(
-    t("message.deleteConfirm"),
-    t("message.deleteConfirmTitle"),
-    {
-      confirmButtonText: t("message.deleteConfirmBtn"),
-      cancelButtonText: t("message.deleteCancelBtn"),
-      type: "warning",
-    }
-  ).then(async () => {
-    try {
-      await DeleteClipboardItem(id);
-      const index = items.value.findIndex((item) => item.ID === id);
-      items.value.splice(index, 1);
-      currentItem.value = items.value[index] || items.value[index - 1] || null;
-      ElMessage.success(t("message.deleteSuccess"));
-    } catch (error) {
-      console.error("删除失败:", error);
-      ElMessage.error(t("message.deleteError", [error]));
-    }
-  });
+  try {
+    await DeleteClipboardItem(id);
+    const index = items.value.findIndex((item) => item.ID === id);
+    items.value.splice(index, 1);
+    currentItem.value = items.value[index] || items.value[index - 1] || null;
+    ElMessage.success(t("message.deleteSuccess"));
+  } catch (error) {
+    console.error("删除失败:", error);
+    ElMessage.error(t("message.deleteError", [error]));
+  }
 }
 
 // 收藏

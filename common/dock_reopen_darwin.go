@@ -4,7 +4,7 @@ package common
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -ObjC -framework Cocoa
+#cgo LDFLAGS: -framework Cocoa
 // Implemented in dock_reopen_darwin.m
 void RegisterReopenObserver(void);
 // Forward declaration to Go callback
