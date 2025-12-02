@@ -145,8 +145,8 @@
           <el-input-number
             v-model="settings.pageSize"
             :min="10"
-            :max="200"
-            :step="10"
+            :max="50000"
+            :step="100"
           />
         </div>
         
@@ -296,7 +296,7 @@ const emit = defineEmits(["back"]);
 const settings = ref({
   autoClean: true,
   retentionDays: 30,
-  pageSize: 50,
+  pageSize: 10000,
   password: "", // 加密后的密码
   hotkey: "Command+Option+c", // 全局快捷键
   backgroundMode: false, // 后台运行模式（仅 macOS）

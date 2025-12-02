@@ -113,6 +113,22 @@ func (a *App) shutdown(ctx context.Context) {
 
 // SearchClipboardItems 搜索剪贴板项目（供前端调用）
 func (a *App) SearchClipboardItems(isFavorite bool, keyword string, filterType string, limit int) ([]common.ClipboardItem, error) {
+	// 验证和限制 limit 参数，防止恶意或过大的值
+	const (
+		minLimit     = 1     // 最小值
+		maxLimit     = 50000 // 最大值，防止内存溢出
+		defaultLimit = 10000 // 默认值
+	)
+
+	// 如果 limit 无效，使用默认值
+	if limit < minLimit {
+		log.Printf("⚠️ limit 值 %d 小于最小值 %d，使用默认值 %d", limit, minLimit, defaultLimit)
+		limit = defaultLimit
+	} else if limit > maxLimit {
+		log.Printf("⚠️ limit 值 %d 超过最大值 %d，限制为 %d", limit, maxLimit, maxLimit)
+		limit = maxLimit
+	}
+
 	items, err := common.SearchClipboardItems(isFavorite, keyword, filterType, limit)
 	if err != nil {
 		log.Printf("搜索剪贴板项目失败: %v", err)
@@ -133,6 +149,22 @@ func (a *App) ToggleFavorite(id string) (int, error) {
 
 // GetClipboardItems 获取剪贴板项目列表（供前端调用）
 func (a *App) GetClipboardItems(limit int) ([]common.ClipboardItem, error) {
+	// 验证和限制 limit 参数，防止恶意或过大的值
+	const (
+		minLimit     = 1     // 最小值
+		maxLimit     = 50000 // 最大值，防止内存溢出
+		defaultLimit = 10000 // 默认值
+	)
+
+	// 如果 limit 无效，使用默认值
+	if limit < minLimit {
+		log.Printf("⚠️ limit 值 %d 小于最小值 %d，使用默认值 %d", limit, minLimit, defaultLimit)
+		limit = defaultLimit
+	} else if limit > maxLimit {
+		log.Printf("⚠️ limit 值 %d 超过最大值 %d，限制为 %d", limit, maxLimit, maxLimit)
+		limit = maxLimit
+	}
+
 	items, err := common.GetClipboardItems(limit)
 	if err != nil {
 		log.Printf("获取剪贴板项目失败: %v", err)

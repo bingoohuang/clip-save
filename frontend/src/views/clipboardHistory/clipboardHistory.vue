@@ -148,9 +148,17 @@
               </el-icon>
             </div>
             <div class="item-footer">
-              <span class="item-type" style="width: 40px">{{
-                item.ContentType
-              }}</span>
+              <div class="item-footer-left">
+                <span class="item-type" style="width: 40px">{{
+                  item.ContentType
+                }}</span>
+                <span v-if="item.ContentType === 'Text'" class="item-char-count">
+                  {{ item.CharCount }} 字
+                </span>
+                <span v-else-if="item.ContentType === 'Image'" class="item-image-info">
+                  {{ formatImageSize(item.CharCount) }} · {{ getImageDimensions(item.Content) }}
+                </span>
+              </div>
               <span class="item-time">{{ formatTime(item.Timestamp) }}</span>
             </div>
           </div>
@@ -357,7 +365,7 @@ async function getSettings(forceRefresh = false) {
     console.error("❌ 读取设置失败:", e);
   }
   // 返回默认值（数据库初始化时应该已经创建了默认设置）
-  cachedSettings = { pageSize: 50, autoClean: true, retentionDays: 30 };
+  cachedSettings = { pageSize: 10000, autoClean: true, retentionDays: 30 };
   return cachedSettings;
 }
 
@@ -366,7 +374,7 @@ async function loadItems() {
   try {
     loading.value = true;
     const settings = await getSettings();
-    const pageSize = settings?.pageSize || 50;
+    const pageSize = settings?.pageSize || 10000;
     console.log("📊 使用页面大小:", pageSize);
 
     const result = await SearchClipboardItems(
@@ -394,7 +402,7 @@ async function checkForUpdates() {
   try {
     // 使用缓存的设置，避免频繁查询数据库
     const settings = await getSettings();
-    const pageSize = settings?.pageSize || 50;
+    const pageSize = settings?.pageSize || 10000;
 
     const result = await SearchClipboardItems(
       leftTab.value === "fav",
@@ -591,6 +599,39 @@ function getPreview(item: ClipboardItem): string {
     preview = preview.substring(0, 27) + "...";
   }
   return preview;
+}
+
+// 格式化图片大小（人类友好格式）
+function formatImageSize(bytes: number): string {
+  if (!bytes || bytes === 0) return "0 B";
+  
+  const units = ["B", "KB", "MB", "GB"];
+  let size = bytes;
+  let unitIndex = 0;
+  
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+  
+  // 保留1位小数，但如果小数部分为0则不显示
+  const formattedSize = size % 1 === 0 ? size.toString() : size.toFixed(1);
+  return `${formattedSize} ${units[unitIndex]}`;
+}
+
+// 从 Content 字段中提取图片宽高
+function getImageDimensions(content: string): string {
+  if (!content) return "";
+  
+  // 格式：图片 1920x1080 (png)
+  const match = content.match(/图片\s+(\d+)x(\d+)/);
+  if (match && match.length === 3) {
+    const width = parseInt(match[1]);
+    const height = parseInt(match[2]);
+    return `${width}×${height}`;
+  }
+  
+  return "";
 }
 
 // 搜索和过滤变化时重新加载
@@ -1072,6 +1113,12 @@ onUnmounted(() => {
   margin-top: 6px;
 }
 
+.item-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .item-type {
   background-color: #f2f2f7;
   color: #6d6d70;
@@ -1081,6 +1128,16 @@ onUnmounted(() => {
   font-weight: 500;
   min-width: 40px;
   text-align: center;
+}
+
+.item-char-count {
+  font-size: 12px;
+  color: #8e8e93;
+}
+
+.item-image-info {
+  font-size: 12px;
+  color: #8e8e93;
 }
 
 .panel-footer {
